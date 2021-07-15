@@ -14,8 +14,6 @@ import {
 	UpdateResult
 } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
-import { mergeMap } from 'rxjs/operators';
-import { of, throwError } from 'rxjs';
 import { environment as env } from '@gauzy/config';
 import * as bcrypt from 'bcrypt';
 import { BaseEntity } from '../entities/internal';
@@ -23,6 +21,8 @@ import { ICrudService } from './icrud.service';
 import { IPagination } from './pagination';
 import { ITryRequest } from './try-request';
 import { filterQuery } from './query-builder';
+import { mergeMap } from 'rxjs/operators';
+import { of as observableOf, throwError } from 'rxjs';
 
 export abstract class CrudService<T extends BaseEntity>
 	implements ICrudService<T> {
@@ -167,13 +167,13 @@ export abstract class CrudService<T extends BaseEntity>
 			stream$.pipe(
 				mergeMap((signal) => {
 					if (!signal) {
-						return throwError(
+						return throwError(() =>
 							new NotFoundException(
 								`The requested record was not found`
 							)
 						);
 					}
-					return of(signal);
+					return observableOf(signal);
 				})
 			);
 	}
